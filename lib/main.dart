@@ -100,6 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     keyboardType: keyboardType,
                     decoration: decoration('USDT Buying Rate'),
                   ),
+                  padding16,
                   TextField(
                     controller: usdtToPkrRateController,
                     keyboardType: keyboardType,
