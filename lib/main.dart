@@ -58,6 +58,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    const padding16 = SizedBox(height: 16);
+    const padding48 = SizedBox(height: 48);
+    const keyboardType =
+        TextInputType.numberWithOptions(decimal: true, signed: false);
+    InputDecoration decoration(String label) {
+      return InputDecoration(
+        border: const OutlineInputBorder(),
+        labelText: label,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -75,9 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  padding16,
                   LabeledValue(label: "Exchange Rate", value: exchangeRate),
                   const Divider(),
                   LabeledValue(label: "Total USDT", value: totalUSDT),
@@ -85,50 +94,30 @@ class _MyHomePageState extends State<MyHomePage> {
                   LabeledValue(label: "Total PKR", value: totalPKR),
                   const Divider(),
                   LabeledValue(label: "Profit", value: profit),
-                  const SizedBox(
-                    height: 48,
-                  ),
+                  padding48,
                   TextField(
                     controller: usdtBuyingRateController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'USDT Buying Rate',
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
+                    keyboardType: keyboardType,
+                    decoration: decoration('USDT Buying Rate'),
                   ),
                   TextField(
                     controller: usdtToPkrRateController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'USDT to PKR Rate',
-                    ),
+                    keyboardType: keyboardType,
+                    decoration: decoration('USDT to PKR Rate'),
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  padding16,
                   TextField(
                     controller: foreignCurrencyController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Total Foreign Currency',
-                    ),
+                    keyboardType: keyboardType,
+                    decoration: decoration('Total Foreign Currency'),
                   ),
-                  const SizedBox(
-                    height: 16,
-                  ),
+                  padding16,
                   TextField(
                     controller: rateProvidedController,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Rate Given to Customer',
-                    ),
+                    keyboardType: keyboardType,
+                    decoration: decoration('Rate Given to Customer'),
                   ),
+                  padding48,
                 ],
               ),
             ),
@@ -138,40 +127,22 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  bool get totalForeignCurrencyProvided {
-    final result = foreignCurrencyController.text.isNotEmpty &&
-        foreignCurrencyController.text != "0";
-    print(
-        "totalForeignCurrencyProvided: $result => text.isNotEmpty: ${foreignCurrencyController.text.isNotEmpty} text != '0': ${foreignCurrencyController.text != '0'}");
-    return result;
-  }
-
-  bool get rateGivenToCustomerProvided {
-    final result = rateProvidedController.text.isNotEmpty &&
-        rateProvidedController.text != "0";
-    print(
-        "rateGivenToCustomerProvided: $result => text.isNotEmpty: ${rateProvidedController.text.isNotEmpty} text != '0': ${rateProvidedController.text != '0'}");
-    return result;
-  }
-
   void onValuesUpdated() {
     try {
-      final usdtBuyingPrice = double.parse(usdtBuyingRateController.text);
+      final usdtBuyingPrice =
+          double.tryParse(usdtBuyingRateController.text) ?? 0;
       final foreignPrice = 1 / usdtBuyingPrice;
-      final totalForeign = double.parse(foreignCurrencyController.text);
+      final totalForeign = double.tryParse(foreignCurrencyController.text) ?? 0;
       totalUSDT = totalForeign * foreignPrice;
-      final usdtToPkr = double.parse(usdtToPkrRateController.text);
+
+      final usdtToPkr = double.tryParse(usdtToPkrRateController.text) ?? 0;
       totalPKR = totalUSDT * usdtToPkr;
       exchangeRate = usdtToPkr / usdtBuyingPrice;
-      if (rateGivenToCustomerProvided) {
-        final rateProvided = double.parse(rateProvidedController.text);
-        profit = totalPKR - (totalForeign * rateProvided);
-        print(profit);
-      } else {
-        print("rate not provided");
-      }
+
+      final rateProvided = double.tryParse(rateProvidedController.text) ?? 0;
+      profit = rateProvided == 0 ? 0 : totalPKR - (totalForeign * rateProvided);
     } catch (e) {
-      print("calculation failed: $e");
+      //TODO: Handle this
     } finally {
       setState(() {});
     }
